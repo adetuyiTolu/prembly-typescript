@@ -8,9 +8,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stainless-sdks/prembly-typescript.git"
+    "url": "git+https://github.com/adetuyiTolu/prembly-typescript.git"
   },
-  "homepage": "https://github.com/stainless-sdks/prembly-typescript/tree/main/packages/mcp-server#readme",
+  "homepage": "https://github.com/adetuyiTolu/prembly-typescript/tree/main/packages/mcp-server#readme",
   "server": {
     "type": "node",
     "entry_point": "index.js",
