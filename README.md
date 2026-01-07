@@ -66,15 +66,17 @@ a subclass of `APIError` will be thrown:
 
 <!-- prettier-ignore -->
 ```ts
-const response = await client.verification.verifyNin({ number_nin: 'REPLACE_ME' }).catch(async (err) => {
-  if (err instanceof Prembly.APIError) {
-    console.log(err.status); // 400
-    console.log(err.name); // BadRequestError
-    console.log(err.headers); // {server: 'nginx', ...}
-  } else {
-    throw err;
-  }
-});
+const response = await client.verification
+  .verifyNin({ number_nin: 'REPLACE_ME' })
+  .catch(async (err) => {
+    if (err instanceof Prembly.APIError) {
+      console.log(err.status); // 400
+      console.log(err.name); // BadRequestError
+      console.log(err.headers); // {server: 'nginx', ...}
+    } else {
+      throw err;
+    }
+  });
 ```
 
 Error codes are as follows:
