@@ -56,7 +56,7 @@ export const newMcpServer = async () =>
   new McpServer(
     {
       name: 'prembly_api',
-      version: '0.0.2',
+      version: '0.1.0',
     },
     {
       instructions: await getInstructions(),
