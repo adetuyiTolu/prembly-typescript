@@ -8,7 +8,7 @@ const client = new Prembly({
 });
 
 describe('resource verification', () => {
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('verifyNin: only required params', async () => {
     const responsePromise = client.verification.verifyNin({ number_nin: '12345678901' });
     const rawResponse = await responsePromise.asResponse();
@@ -20,7 +20,7 @@ describe('resource verification', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  // Prism tests are disabled
+  // Mock server tests are disabled
   test.skip('verifyNin: required and optional params', async () => {
     const response = await client.verification.verifyNin({ number_nin: '12345678901' });
   });
