@@ -1,6 +1,6 @@
 {
   "name": "prembly",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "The official TypeScript library for the Prembly API",
   "author": "Prembly <>",
   "types": "dist/index.d.ts",
