@@ -60,7 +60,7 @@ $ yarn link prembly
 # With pnpm
 $ pnpm link --global
 $ cd ../my-package
-$ pnpm link -—global prembly
+$ pnpm link --global prembly
 ```
 
 ## Running tests
