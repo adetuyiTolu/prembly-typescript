@@ -1,74 +1,79 @@
 # Dockerfile for Prembly MCP Server
-    #
-    # This Dockerfile builds a Docker image for the MCP Server.
-    #
-    # To build the image locally:
-    #   docker build -f packages/mcp-server/Dockerfile -t prembly-mcp:local .
-    #
-    # To run the image:
-    #   docker run -i prembly-mcp:local [OPTIONS]
-    #
-    # Common options:
-    #   --tool=<name>              Include specific tools
-    #   --resource=<name>          Include tools for specific resources
-    #   --operation=read|write     Filter by operation type
-    #   --client=<type>            Set client compatibility (e.g., claude, cursor)
-    #   --transport=<type>         Set transport type (stdio or http)
-    #
-    # For a full list of options:
-    #   docker run -i prembly-mcp:local --help
-    #
-    # Note: The MCP server uses stdio transport by default. Docker's -i flag
-    # enables interactive mode, allowing the container to communicate over stdin/stdout.
+#
+# This Dockerfile builds a Docker image for the MCP Server.
+#
+# To build the image locally:
+#   docker build -f packages/mcp-server/Dockerfile -t prembly-mcp:local .
+#
+# To run the image:
+#   docker run -i prembly-mcp:local [OPTIONS]
+#
+# Common options:
+#   --tool=<name>              Include specific tools
+#   --resource=<name>          Include tools for specific resources
+#   --operation=read|write     Filter by operation type
+#   --client=<type>            Set client compatibility (e.g., claude, cursor)
+#   --transport=<type>         Set transport type (stdio or http)
+#
+# For a full list of options:
+#   docker run -i prembly-mcp:local --help
+#
+# Note: The MCP server uses stdio transport by default. Docker's -i flag
+# enables interactive mode, allowing the container to communicate over stdin/stdout.
 
-    # Build stage
-    FROM node:20-alpine AS builder
+# Build stage
+FROM node:24-alpine AS builder
 
 # Enable corepack to use pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-    # Install bash for build script
-    RUN apk add --no-cache bash openssl
+# Install bash for build script
+RUN apk add --no-cache bash openssl
 
-    # Set working directory
-    WORKDIR /build
+# Set working directory
+WORKDIR /build
 
-    # Copy entire repository
-    COPY . .
+# Copy entire repository
+COPY . .
 
-    # Install all dependencies and build everything
-    RUN pnpm install --frozen-lockfile && \
-        pnpm build
+# Set CI environment variable so pnpm install runs without prompts
+ENV CI=true
 
-    # Production stage
+# Install all dependencies and build everything
+RUN pnpm install --frozen-lockfile && \
+    pnpm build
 
-    # Add non-root user
-    RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+FROM denoland/deno:alpine-2.7.1
 
-    # Set working directory
-    WORKDIR /app
+# Install node and npm
+RUN apk add --no-cache nodejs npm
 
-# Copy the built mcp-server preserving directory structure
-COPY --from=builder /build/packages/mcp-server/dist ./packages/mcp-server/dist
-COPY --from=builder /build/packages/mcp-server/node_modules ./packages/mcp-server/node_modules
+ENV LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
 
-# Copy node_modules from root (pnpm hoists dependencies here)
-COPY --from=builder /build/node_modules ./node_modules
+# Add non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
-    # Copy the built prembly into node_modules
-    COPY --from=builder /build/dist ./node_modules/prembly
+# Set working directory
+WORKDIR /app
 
-    # Change ownership to nodejs user
-    RUN chown -R nodejs:nodejs /app
+# Copy the build results, preserving directory structure
+COPY --from=builder /build .
 
-    # Switch to non-root user
-    USER nodejs
+# Copy the built prembly into node_modules
+COPY --from=builder /build/dist ./node_modules/prembly
 
-    # The MCP server uses stdio transport by default
-    # No exposed ports needed for stdio communication
+# Change ownership to nodejs user
+RUN chown -R nodejs:nodejs /app
+RUN chown -R nodejs:nodejs /deno-dir
 
-    # Set the entrypoint to the MCP server
-    ENTRYPOINT ["node", "packages/mcp-server/dist/index.js"]
+# Switch to non-root user
+USER nodejs
 
-    # Allow passing arguments to the MCP server
-    CMD []
+# The MCP server uses stdio transport by default
+# No exposed ports needed for stdio communication
+
+# Set the entrypoint to the MCP server
+ENTRYPOINT ["node", "packages/mcp-server/dist/index.js"]
+
+# Allow passing arguments to the MCP server
+CMD []
